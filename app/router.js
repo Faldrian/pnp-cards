@@ -7,6 +7,8 @@ const Router = EmberRouter.extend({
 });
 
 Router.map(function() {
+  this.route('settings');
+  this.route('cards');
 });
 
 export default Router;
