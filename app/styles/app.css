@@ -31,4 +31,36 @@ main {
 /* --- Cards --- */
 .mdl-card {
   width: 100%;
+  max-width: 60em;
+  min-height: auto;
+}
+
+.fielddef {
+  margin-bottom: 0.5em;
+}
+
+.fielddef-title {
+  font-size: 3em;
+  line-height: 1.5em;
+}
+
+.fielddef-title .field-title {
+  display: none;
+}
+
+.fielddef-long {
+
+}
+
+.fielddef-short .field-title,
+.fielddef-short .field-content {
+  display: inline;
+}
+
+.field-title {
+  font-weight: bold;
+}
+
+.field-title::after {
+  content: ":"
 }

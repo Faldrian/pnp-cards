@@ -1,18 +1,25 @@
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+<div
+  class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header"
+>
   <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
-      <span class="mdl-layout-title">Title</span>
+      <span class="mdl-layout-title">Pen & Paper Karten</span>
     </div>
   </header>
   <div class="mdl-layout__drawer">
     <span class="mdl-layout-title">Listen</span>
     <nav class="mdl-navigation">
       {{#each lists as |list|}}
-        {{#link-to "list" list}}{{list.name}}{{/link-to}} <!--  class="mdl-navigation__link" -->
+        {{#link-to "list" list class="mdl-navigation__link"}}{{list.name}}{{/link-to}}
       {{/each}}
-      {{#link-to "settings"}}Settings{{/link-to}}
     </nav>
+
+    <span class="mdl-layout-title">Sonstiges</span>
+    <div class="mdl-navigation">
+      {{#link-to "settings" class="mdl-navigation__link"}}Settings{{/link-to}}
+    </div>
   </div>
+
   <main class="mdl-layout__content">
     <div class="page-content">{{yield}}</div>
   </main>

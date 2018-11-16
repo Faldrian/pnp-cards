@@ -1,7 +1,10 @@
 <div class="mdl-card mdl-shadow--2dp">
   <div class="mdl-card__supporting-text">
     {{#each card.fields as |field|}}
-      <div>{{field.content}} ({{field.fielddef.format}})</div>
+      <div class="fielddef fielddef-{{field.fielddef.format}}">
+        <div class="field-title">{{field.fielddef.title}}</div>
+        <div class="field-content">{{field.content}}</div>
+      </div>
     {{/each}}
   </div>
 </div>
