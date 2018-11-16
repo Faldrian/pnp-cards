@@ -2,6 +2,7 @@ import DS from 'ember-data';
 import { Model } from 'ember-pouch';
 
 export default Model.extend({
-	format: DS.attr(),
-	fields: DS.hasMany('field')
+	list: DS.belongsTo('list'),
+	fields: DS.hasMany('field', {save: true}),
+	format: DS.attr()
 });

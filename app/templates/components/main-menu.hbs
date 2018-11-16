@@ -1,0 +1,19 @@
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
+  <header class="mdl-layout__header">
+    <div class="mdl-layout__header-row">
+      <span class="mdl-layout-title">Title</span>
+    </div>
+  </header>
+  <div class="mdl-layout__drawer">
+    <span class="mdl-layout-title">Listen</span>
+    <nav class="mdl-navigation">
+      {{#each lists as |list|}}
+        {{#link-to "list" list}}{{list.name}}{{/link-to}} <!--  class="mdl-navigation__link" -->
+      {{/each}}
+      {{#link-to "settings"}}Settings{{/link-to}}
+    </nav>
+  </div>
+  <main class="mdl-layout__content">
+    <div class="page-content">{{yield}}</div>
+  </main>
+</div>

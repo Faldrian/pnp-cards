@@ -3,6 +3,6 @@ import { Model } from 'ember-pouch';
 
 export default Model.extend({
 	name: DS.attr(),
-	fielddefs: DS.hasMany('fielddef'),
-	cards: DS.hasMany('card')
+	fielddefs: DS.hasMany('fielddef', {save: true}),
+	cards: DS.hasMany('card', {save: true})
 });

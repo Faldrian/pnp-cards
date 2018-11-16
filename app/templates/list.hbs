@@ -1,0 +1,5 @@
+<h1>Karten für {{model.name}}</h1>
+
+{{#each model.cards as |card|}}
+  {{card-component card=card}}
+{{/each}}

@@ -1,4 +1,4 @@
-/* fallback */
+/* --- Material Font --- */
 @font-face {
   font-family: 'Material Icons';
   font-style: normal;
@@ -20,4 +20,15 @@
   direction: ltr;
   -moz-font-feature-settings: 'liga';
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- Layout --- */
+main {
+  padding: 1em;
+}
+
+
+/* --- Cards --- */
+.mdl-card {
+  width: 100%;
 }

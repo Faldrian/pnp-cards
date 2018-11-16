@@ -1,7 +1,7 @@
 <h1>Einstellungen</h1>
 
 {{#each model as |liste|}}
-	eine liste! {{liste.name}}<br>
+eine liste: {{liste.name}}, id: {{liste.id}}<br>
 {{/each}}
 
 <button onclick={{action "addentry"}} >nochwas</button>
@@ -10,6 +10,6 @@
   <i class="material-icons">add</i>
 </button>
 
-<input type="file" onchange={{action "handleFiles"}} accept=".csv" />
+<input type="file" onchange={{action "handleFiles"}} accept=".csv">
 
 {{outlet}}
