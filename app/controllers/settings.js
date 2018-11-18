@@ -7,79 +7,50 @@ function validateCsv(data) {
 	return true;
 }
 
+
 function deleteList(store, list) {
-	Promise.all([
-		store.query('fielddef', {filter: {list : list.id}}), // 0
-		store.query('card', {filter: {list : list.id}})      // 1
+	return Promise.all([
+		store.query('fielddef', {
+			filter: { list: list.id, format: {'$exists': true}} // bad dobby!
+		}),
+		store.query('card', {
+			filter: { list: list.id, format: {'$exists': false}}
+		})
 	]).then((results) => {
 		let fielddefs = results[0], cards = results[1];
 
-		Promise.all(
-			cards.map(c => store.query('field', {filter: {card: c.id}}))
-		).then((cardFields) => {
+		// delete all fields of the card - and the card afterwards
+		return Promise.all(cards.map(card => {
+			return store.query('field', {
+				filter: { card: card.id}
+			})
+			.then(fields => Promise.all(fields.map(o => {
+				console.log("destroy field", o.id);
+				return o.destroyRecord();
+			})))
+			.then(() => console.log("fields destroyed."))
 
-			let fields = [];
-			cardFields.forEach(fieldsPerCard => {
-				fieldsPerCard.forEach(o => fields.push(o));
-			});
+			.then(() => {
+				console.log("destroy card", card.id);
+				return card.destroyRecord();
+			})
+			.then(() => console.log("card destroyed."));
+		}))
 
-			// destroy all fields
-			Promise.all(fields.map(f => {
-				console.log("destroy field", f.id);
-				return f.destroyRecord();
-			}))
+		// delete all fielddefs
+		.then(() => Promise.all(fielddefs.map(o => {
+			console.log("destroy fielddef", o.id);
+			return o.destroyRecord();
+		})))
+		.then(() => console.log("fielddefs destroyed."))
 
-			// destroy all fielddefs
-				.then(() => Promise.all(fielddefs.map(o => {
-					console.log("destroy fielddef", o.id);
-					return o.destroyRecord();
-				})))
-
-			// destroy all cards
-				.then(() => Promise.all(cards.map(o => o.destroyRecord())))
-
-			// destroy list
-				.then(() => list.destroyRecord());
-		});
+		// delete list
+		.then(() => {
+			console.log("destroy list", list.id);
+			return list.destroyRecord();
+		})
+		.then(() => console.log("list destroyed."));
 	});
-	//
-	// // load all card details, so we get all fields loaded.
-	// let cardPromises = list.cards.map(card => store.findRecord('card', card.id));
-	//
-	// // now everything is loaded, destroy everything!
-	// Promise.all(cardPromises).then(function(allCards) {
-	// 	console.log("all cards loaded");
-	//
-	// 	let fields = [];
-	// 	allCards.forEach(c => {
-	// 		c.fields.forEach(f => fields.push(f))
-	// 	});
-	//
-	// 	store.query('fielddef', {
-	// 		filter: {'list' : list.id}
-	// 	}).then(x => x.forEach(j => console.log(j.id)));
-	//
-	// 	store.query('card', {
-	// 		filter: {'list' : list.id}
-	// 	}).then(x => x.forEach(j => console.log(j.id)));
-	//
-	//
-
-
-		// let promises = list.fielddefs.map(o => {
-		// 			store.findRecord('fielddef', o.id).then(x => console.log(x)).catch(e => console.log(e));
-		// 		});
-		// Promise.all(promises).then(() => console.log("done")).catch(() => console.log("error"));
-		  // .then(() => {
-			// 	console.log("fielddefs done");
-			// 	return Promise.all([]);
-			// })
-			// .then(() => Promise.all(fields.map(o => o.destroyRecord())))
-			// .then(() => Promise.all(allCards.map(o => o.destroyRecord())))
-			// .then(() => list.destroyRecord())
-			// .then(console.log("list " + list.name + " destroyed."));
-
-	// });
 }
 
 
@@ -96,6 +67,7 @@ function storeList(store, data, listname) {
 		let fielddef = store.createRecord('fielddef', {
 			title: data[0][col],
 			format: data[1][col],
+			order: col,
 			list: list
 		});
 		fielddefs[col] = fielddef;
@@ -178,7 +150,8 @@ export default Controller.extend({
 
 		deleteList(list) {
 			if(confirm("Liste " + list.name + " wirklich löschen?"))
-				deleteList(this.store, list);
+				deleteList(this.store, list)
+				.then(() => console.log("deletion successfull"));
 		},
 
 		test() {

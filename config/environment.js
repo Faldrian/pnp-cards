@@ -47,5 +47,10 @@ module.exports = function(environment) {
     // here you can enable a production-specific feature
   }
 
+  // Ember config
+  ENV.emberPouch = {
+    eventuallyConsistent: false  // since we are only local
+  };
+
   return ENV;
 };

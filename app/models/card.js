@@ -3,5 +3,5 @@ import { Model } from 'ember-pouch';
 
 export default Model.extend({
 	list: DS.belongsTo('list'),
-	fields: DS.hasMany('field', {save: true})
+	fields: DS.hasMany('field', {save: true}),
 });
