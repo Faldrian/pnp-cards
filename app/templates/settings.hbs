@@ -1,15 +1,16 @@
-<h1>Einstellungen</h1>
+<h2>Listen</h2>
+<p>
+  <ul>
+    {{#each model as |list|}}
+      <li>{{list.name}} <button {{action "deleteList" list}}>Löschen</button></li>
+    {{/each}}
+  </ul>
+</p>
 
-{{#each model as |liste|}}
-eine liste: {{liste.name}}, id: {{liste.id}}<br>
-{{/each}}
+<h2>Liste hochladen</h2>
+<p>Existierende Listen mit gleichem Dateinamen werden überschrieben.</p>
+<p><input type="file" onchange={{action "handleFiles"}} accept=".csv"></p>
 
-<button onclick={{action "addentry"}} >nochwas</button>
-
-<button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored">
-  <i class="material-icons">add</i>
-</button>
-
-<input type="file" onchange={{action "handleFiles"}} accept=".csv">
+<button {{action "test"}}>test</button>
 
 {{outlet}}

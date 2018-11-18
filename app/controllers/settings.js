@@ -7,6 +7,82 @@ function validateCsv(data) {
 	return true;
 }
 
+function deleteList(store, list) {
+	Promise.all([
+		store.query('fielddef', {filter: {list : list.id}}), // 0
+		store.query('card', {filter: {list : list.id}})      // 1
+	]).then((results) => {
+		let fielddefs = results[0], cards = results[1];
+
+		Promise.all(
+			cards.map(c => store.query('field', {filter: {card: c.id}}))
+		).then((cardFields) => {
+
+			let fields = [];
+			cardFields.forEach(fieldsPerCard => {
+				fieldsPerCard.forEach(o => fields.push(o));
+			});
+
+			// destroy all fields
+			Promise.all(fields.map(f => {
+				console.log("destroy field", f.id);
+				return f.destroyRecord();
+			}))
+
+			// destroy all fielddefs
+				.then(() => Promise.all(fielddefs.map(o => {
+					console.log("destroy fielddef", o.id);
+					return o.destroyRecord();
+				})))
+
+			// destroy all cards
+				.then(() => Promise.all(cards.map(o => o.destroyRecord())))
+
+			// destroy list
+				.then(() => list.destroyRecord());
+		});
+	});
+	//
+	// // load all card details, so we get all fields loaded.
+	// let cardPromises = list.cards.map(card => store.findRecord('card', card.id));
+	//
+	// // now everything is loaded, destroy everything!
+	// Promise.all(cardPromises).then(function(allCards) {
+	// 	console.log("all cards loaded");
+	//
+	// 	let fields = [];
+	// 	allCards.forEach(c => {
+	// 		c.fields.forEach(f => fields.push(f))
+	// 	});
+	//
+	// 	store.query('fielddef', {
+	// 		filter: {'list' : list.id}
+	// 	}).then(x => x.forEach(j => console.log(j.id)));
+	//
+	// 	store.query('card', {
+	// 		filter: {'list' : list.id}
+	// 	}).then(x => x.forEach(j => console.log(j.id)));
+	//
+	//
+
+
+		// let promises = list.fielddefs.map(o => {
+		// 			store.findRecord('fielddef', o.id).then(x => console.log(x)).catch(e => console.log(e));
+		// 		});
+		// Promise.all(promises).then(() => console.log("done")).catch(() => console.log("error"));
+		  // .then(() => {
+			// 	console.log("fielddefs done");
+			// 	return Promise.all([]);
+			// })
+			// .then(() => Promise.all(fields.map(o => o.destroyRecord())))
+			// .then(() => Promise.all(allCards.map(o => o.destroyRecord())))
+			// .then(() => list.destroyRecord())
+			// .then(console.log("list " + list.name + " destroyed."));
+
+	// });
+}
+
+
 function storeList(store, data, listname) {
 	// if the last row is only one field long (trailng newline), remove it.
 	if(data[data.length -1].length == 1) data.pop();
@@ -60,67 +136,10 @@ function storeList(store, data, listname) {
 
 export default Controller.extend({
 	actions: {
-		addentry() {
-			const list = this.store.createRecord('list', {
-				name: "TestListe",
-			});
-
-			const fielddef1 = this.store.createRecord('fielddef', {
-				format: 'normal',
-				list: list
-			});
-
-			const card = this.store.createRecord('card', {
-				list: list
-			});
-
-			const field1 = this.store.createRecord('field', {
-				card: card,
-				fielddef: fielddef1,
-				content: "field1"
-			});
-
-			// save from bottom to top
-			field1.save()
-				.then(function() {
-					console.log("saving ", card);
-					return card.save();
-				})
-				.then(function() {
-					console.log("saving ", fielddef1);
-					return fielddef1.save();
-				})
-				.then(function() {
-					console.log("saving ", list);
-					return list.save();
-				})
-
-				// save from top to bottom
-				.then(function() {
-					console.log("saving ", fielddef1);
-					return fielddef1.save();
-				})
-				.then(function() {
-					console.log("saving ", card);
-					return card.save();
-				})
-				.then(function() {
-					console.log("saving ", field1);
-					return field1.save();
-				});
-		},
-
 		handleFiles(event) {
 			const file = event.target.files[0];
 			const name = file.name;
 			const store = this.store; // so I can access it in callbacks
-
-			// only allow csv mimetype
-			if(file.type !== "text/csv") {
-				// TODO: Error!
-				console.error("Wrong file type!");
-				return;
-			}
 
 			// discard file ending, if we can detect one
 			let listname = (name.indexOf(".") > -1) ? name.substr(0, name.lastIndexOf(".")) : name;
@@ -134,17 +153,41 @@ export default Controller.extend({
 					// validate the files
 					if (!validateCsv(results.data)) {
 						// TODO: Error!
-						console.error("Invalid list!");
+						alert("Invalid list!");
 						return;
 					}
 
-					// if there is an old list, remove it completely
-					// TODO
+					store.queryRecord('list', {
+						filter: {name: listname}
+					}).then(function (oldlist) {
+						if(oldlist != null) {
+							if(!confirm("Liste " + listname + " existiert schon. Ersetzen?")) {
+								alert("Hochladen abgebrochen.");
+								return;
+							} else {
+								deleteList(store, oldlist);
+							}
+						}
 
-					// store the new list
-					storeList(store, results.data, listname);
+						// no objections, we can store the list
+						storeList(store, results.data, listname);
+					});
 				}
 			});
+		},
+
+		deleteList(list) {
+			if(confirm("Liste " + list.name + " wirklich löschen?"))
+				deleteList(this.store, list);
+		},
+
+		test() {
+			this.store.queryRecord('list', {
+				filter: {name: "dsa4-zauber"}
+			})
+				.then(function(list) {
+					console.log(list.id, list.name);
+				});
 		}
 	}
 });
